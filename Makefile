@@ -1,13 +1,17 @@
 CC = gcc
 LD = ld
-CFLAGS = -c -O2 -g3
+CFLAGS = -O2 -g3
 .PHONY: clean
+
+CRT1=$(shell ${CC} --print-file-name=crt1.o)
+CRTi=$(shell ${CC} --print-file-name=crti.o)
+LIBC=$(shell ${CC} --print-file-name=libc.so.6)
+CRTn=$(shell ${CC} --print-file-name=crtn.o)
+LDSO=$(shell ${CC} --print-file-name=ld-linux-x86-64.so.2)
 
 # Can find option for `-b`: `binary` by looking through the output of `objdump -i`
 main: main.o
-	$(LD) -o $@ $^ /usr/lib/crt1.o /usr/lib/crti.o /usr/lib/libc.so.6 /usr/lib/crtn.o -b binary ./msg.txt --dynamic-linker /lib64/ld-linux-x86-64.so.2
-
-main.o: main.c
+	$(LD) -o $@ $^ $(CRT1) $(CRTi) $(LIBC) $(CRTn) -b binary ./msg.txt --dynamic-linker $(LDSO)
 
 clean:
 	rm -f *.o main
